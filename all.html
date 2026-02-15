@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบโรงเรียน - หน้าต้อนรับ</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --glass-bg: rgba(20, 20, 20, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --primary-rgb: 129, 140, 248;
+      --accent-rgb: 167, 139, 250;
+      --cyan-rgb: 34, 211, 238;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #050510;
+    }
+
+    /* ═══ BACKGROUND SLIDER ═══ */
+    .bg-slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .bg-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+    }
+
+    .bg-slide:nth-child(1) {
+      background-image: url('https://scontent.fcnx4-2.fna.fbcdn.net/v/t39.30808-6/575086126_1621357925920930_991978821720519793_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=j3AN2LimE2MQ7kNvwHTJz0p&_nc_oc=AdlIDbAgCTE38lq-CB_tWEPTtCCbJbyCQZkkFW85wbz_5-3UPO5n_MW28Ajo5KAVQ4c&_nc_zt=23&_nc_ht=scontent.fcnx4-2.fna&_nc_gid=_1mP9b2MtfVEf9ZE46fn_A&oh=00_AftDcVXrOQogWc2YJQg08JvWeo82y1IeEOAtkkdQgPcPsA&oe=6994D7E8');
+      animation: slideShow 12s infinite;
+    }
+
+    .bg-slide:nth-child(2) {
+      background-image: url('https://scontent.fcnx4-2.fna.fbcdn.net/v/t39.30808-6/569683175_1613136383409751_2510789747609789095_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=86c6b0&_nc_ohc=BdzTzewTxOoQ7kNvwEf8oU5&_nc_oc=AdlypWiYeXXcASQybuRy6VErUaaZV55pplpGLFf8wS866mONA10Sjx1fcGY8L-AJVZ4&_nc_zt=23&_nc_ht=scontent.fcnx4-2.fna&_nc_gid=dJptWJfAoStlH7SSIBJBUA&oh=00_AftlKucIbTvRSTgt2lLDMGBPO98Xd8hDhbigDeDMeKyF3A&oe=6994AF5A');
+      animation: slideShow 12s infinite 6s;
+    }
+
+    @keyframes slideShow {
+      0% {
+        opacity: 0;
+        transform: scale(1);
+      }
+
+      15% {
+        opacity: 1;
+      }
+
+      45% {
+        opacity: 1;
+      }
+
+      60% {
+        opacity: 0;
+        transform: scale(1.05);
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 5, 16, 0.72);
+      backdrop-filter: blur(10px);
+      z-index: 1;
+    }
+
+    /* ═══ FLOATING ORBS ═══ */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.3;
+      animation: orbFloat 20s ease-in-out infinite alternate;
+    }
+
+    .bg-orb:nth-child(1) {
+      width: 420px;
+      height: 420px;
+      top: -10%;
+      left: -8%;
+      background: rgba(var(--primary-rgb), 0.35);
+      animation-duration: 18s;
+    }
+
+    .bg-orb:nth-child(2) {
+      width: 350px;
+      height: 350px;
+      bottom: -12%;
+      right: -6%;
+      background: rgba(var(--accent-rgb), 0.3);
+      animation-duration: 24s;
+      animation-delay: -5s;
+    }
+
+    .bg-orb:nth-child(3) {
+      width: 250px;
+      height: 250px;
+      top: 45%;
+      left: 60%;
+      background: rgba(var(--cyan-rgb), 0.15);
+      animation-duration: 28s;
+      animation-delay: -10s;
+    }
+
+    @keyframes orbFloat {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      33% {
+        transform: translate(30px, -50px) scale(1.1);
+      }
+
+      66% {
+        transform: translate(-25px, 35px) scale(0.95);
+      }
+
+      100% {
+        transform: translate(20px, -20px) scale(1.05);
+      }
+    }
+
+    /* Noise texture */
+    .bg-noise {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      opacity: 0.02;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px;
+    }
+
+    /* ═══ DEV BADGE ═══ */
+    .dev-badge {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.35);
+      padding: 7px 15px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .dev-badge i {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .dev-badge:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ═══ MAIN CONTENT ═══ */
+    .main-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ═══ WELCOME SCREEN ═══ */
+    #welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: welcomeFadeIn 0.8s ease-out;
+    }
+
+    @keyframes welcomeFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* 3D Logo Container - แบบหมุนอัตโนมัติ */
+    .logo-container {
+      width: 260px;
+      height: 260px;
+      perspective: 1200px;
+      cursor: pointer;
+      margin-bottom: 32px;
+    }
+
+    .logo-wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border-radius: 50%;
+      transform-style: preserve-3d;
+      animation: autoRotate 12s infinite linear;
+    }
+
+    /* หมุนอัตโนมัติตลอดเวลา */
+    @keyframes autoRotate {
+      0% {
+        transform: rotateY(0deg);
+      }
+      100% {
+        transform: rotateY(360deg);
+      }
+    }
+
+    /* หยุดหมุนชั่วคราวเมื่อ hover */
+    .logo-container:hover .logo-wrapper {
+      animation-play-state: paused;
+    }
+
+    .logo-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backface-visibility: visible;
+      -webkit-backface-visibility: visible;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 50px rgba(var(--primary-rgb), 0.08);
+      overflow: hidden;
+    }
+
+    /* Spinning ring effect for both faces */
+    .logo-face::before {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg,
+          rgba(var(--primary-rgb), 0.5),
+          transparent 25%,
+          rgba(var(--accent-rgb), 0.4) 50%,
+          transparent 75%,
+          rgba(var(--cyan-rgb), 0.3));
+      animation: ringSpin 5s linear infinite;
+      z-index: -1;
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+    }
+
+    /* Pulse glow behind both faces */
+    .logo-face::after {
+      content: "";
+      position: absolute;
+      inset: -25px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(var(--primary-rgb), 0.1), transparent 70%);
+      animation: logoPulse 3s ease-in-out infinite;
+      z-index: -2;
+    }
+
+    @keyframes ringSpin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes logoPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.4;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    .logo-face.front {
+      transform: rotateY(0deg);
+    }
+
+    .logo-face.back {
+      transform: rotateY(180deg);
+    }
+
+    /* Mirror effect for back face */
+    .logo-face.back .logo-img {
+      transform: scaleX(-1);
+    }
+
+    .logo-img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
+    }
+
+    .tap-text {
+      margin-top: 32px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 3px;
+      animation: pulseText 2.5s ease-in-out infinite;
+    }
+
+    /* ═══ MENU SCREEN ═══ */
+    #menu-screen {
+      display: none;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .menu-card {
+      background: rgba(15, 15, 25, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 28px;
+      padding: 38px 32px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Gradient top line */
+    .menu-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent 5%, rgba(var(--primary-rgb), 0.4), rgba(var(--accent-rgb), 0.3), transparent 95%);
+    }
+
+    .menu-header {
+      text-align: center;
+      margin-bottom: 28px;
+      color: white;
+    }
+
+    .menu-header h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      background: linear-gradient(135deg, #fff 30%, rgba(var(--primary-rgb), 1));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-header p {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 300;
+    }
+
+    /* ═══ BUTTON GRID ═══ */
+    .grid-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .btn-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 28px 15px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Shimmer sweep on hover */
+    .btn-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+      transition: left 0.6s ease;
+      pointer-events: none;
+    }
+
+    .btn-item:hover::before {
+      left: 150%;
+    }
+
+    /* Glow line on top */
+    .btn-item::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--btn-glow, linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .btn-item:hover::after {
+      opacity: 1;
+    }
+
+    .btn-item:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), var(--btn-shadow, 0 0 0 transparent);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-item:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    .btn-item i {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-item:hover i {
+      transform: scale(1.2) rotate(-8deg);
+    }
+
+    .btn-text h3 {
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+
+    .btn-text span {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Per-button colors */
+    .b-toilet {
+      --btn-glow: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.5), transparent);
+      --btn-shadow: 0 0 25px rgba(79, 172, 254, 0.08);
+    }
+
+    .b-toilet i {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px rgba(79, 172, 254, 0.3));
+    }
+
+    .b-check {
+      --btn-glow: linear-gradient(90deg, transparent, rgba(67, 233, 123, 0.5), transparent);
+      --btn-shadow: 0 0 25px rgba(67, 233, 123, 0.08);
+    }
+
+    .b-check i {
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px rgba(67, 233, 123, 0.3));
+    }
+
+    /* Admin Button */
+    .btn-admin {
+      grid-column: span 2;
+      flex-direction: row;
+      justify-content: flex-start;
+      padding: 20px 25px;
+      gap: 18px;
+      --btn-glow: linear-gradient(90deg, transparent, rgba(255, 153, 102, 0.5), transparent);
+      --btn-shadow: 0 0 25px rgba(255, 153, 102, 0.08);
+    }
+
+    .btn-admin i {
+      margin-bottom: 0;
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #ff9966, #ff5e62);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px rgba(255, 153, 102, 0.3));
+    }
+
+    /* Back button */
+    .back-btn {
+      margin-top: 22px;
+      color: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 300;
+      transition: all 0.3s;
+      padding: 8px 20px;
+      border-radius: 20px;
+    }
+
+    .back-btn:hover {
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.04);
+      letter-spacing: 1px;
+    }
+
+    /* ═══ STAGGERED ENTRANCE ═══ */
+    .menu-card.show .menu-header {
+      animation: itemFadeIn 0.35s ease-out both;
+      animation-delay: 0.05s;
+    }
+
+    .menu-card.show .btn-item:nth-child(1) {
+      animation: itemFadeIn 0.35s ease-out both;
+      animation-delay: 0.1s;
+    }
+
+    .menu-card.show .btn-item:nth-child(2) {
+      animation: itemFadeIn 0.35s ease-out both;
+      animation-delay: 0.18s;
+    }
+
+    .menu-card.show .btn-item:nth-child(3) {
+      animation: itemFadeIn 0.35s ease-out both;
+      animation-delay: 0.26s;
+    }
+
+    .menu-card.show .back-btn {
+      animation: itemFadeIn 0.35s ease-out both;
+      animation-delay: 0.32s;
+    }
+
+    @keyframes itemFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ═══ ANIMATIONS ═══ */
+    @keyframes pulseText {
+
+      0%,
+      100% {
+        opacity: 0.35;
+      }
+
+      50% {
+        opacity: 0.85;
+      }
+    }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 480px) {
+      .logo-container {
+        width: 200px;
+        height: 200px;
+      }
+
+      .menu-card {
+        padding: 28px 20px;
+        border-radius: 24px;
+      }
+
+      .grid-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-admin {
+        grid-column: span 1;
+      }
+
+      .bg-orb:nth-child(1) {
+        width: 260px;
+        height: 260px;
+      }
+
+      .bg-orb:nth-child(2) {
+        width: 200px;
+        height: 200px;
+      }
+
+      .bg-orb:nth-child(3) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="#" class="dev-badge">
+    <i class="fas fa-code"></i> Dev by 6/7
+  </a>
+
+  <div class="bg-slider">
+    <div class="bg-slide"></div>
+    <div class="bg-slide"></div>
+  </div>
+
+  <div class="overlay"></div>
+
+  <!-- Floating Orbs -->
+  <div class="bg-orbs">
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+  </div>
+  <div class="bg-noise"></div>
+
+  <div class="main-container">
+
+    <div id="welcome-screen">
+      <div class="logo-container" onclick="showMenu()">
+        <div class="logo-wrapper">
+          <div class="logo-face front">
+            <img
+              src="https://media.discordapp.net/attachments/1282030855119966349/1471524189373599795/23c307897ed1e453.png?ex=698fe7f2&is=698e9672&hm=2b14a3beab8cc673f2ea53153df867e4266ba416401f02e4314dfaebf926da10&=&format=webp&quality=lossless&width=648&height=648"
+              alt="School Logo" class="logo-img">
+          </div>
+          <div class="logo-face back">
+            <img
+              src="https://media.discordapp.net/attachments/1282030855119966349/1471524189373599795/23c307897ed1e453.png?ex=698fe7f2&is=698e9672&hm=2b14a3beab8cc673f2ea53153df867e4266ba416401f02e4314dfaebf926da10&=&format=webp&quality=lossless&width=648&height=648"
+              alt="School Logo Reverse" class="logo-img">
+          </div>
+        </div>
+      </div>
+      <p class="tap-text">แตะเพื่อเข้าสู่ระบบ</p>
+    </div>
+
+    <div id="menu-screen">
+      <div class="menu-card" id="menuCard">
+        <div class="menu-header">
+          <h2>ระบบสารสนเทศ</h2>
+          <p>กรุณาเลือกเมนูที่ต้องการใช้งาน</p>
+        </div>
+
+        <div class="grid-buttons">
+          <a href="https://bathroom-check.vercel.app/" class="btn-item b-toilet">
+            <i class="fas fa-restroom"></i>
+            <div class="btn-text">
+              <h3>ขอเข้าห้องน้ำ</h3>
+              <span>Toilet Access</span>
+            </div>
+          </a>
+
+          <a href="https://bathroom-check-system.web.app/tutoring.html" class="btn-item b-check">
+            <i class="fas fa-clipboard-check"></i>
+            <div class="btn-text">
+              <h3>ระบบเช็คชื่อ</h3>
+              <span>Check-in</span>
+            </div>
+          </a>
+
+          <a href="https://bathroom-check-system.web.app/admin.html" class="btn-item btn-admin">
+            <i class="fas fa-user-shield"></i>
+            <div class="btn-text">
+              <h3>สำหรับผู้ดูแลระบบ</h3>
+              <span>Admin / Teacher Only</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="back-btn" onclick="hideMenu()">
+          <i class="fas fa-arrow-left"></i> กลับหน้าหลัก
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function showMenu() {
+      const welcome = document.getElementById('welcome-screen');
+      const menu = document.getElementById('menu-screen');
+      const card = document.getElementById('menuCard');
+
+      welcome.style.opacity = '0';
+      welcome.style.transform = 'scale(0.9)';
+
+      setTimeout(() => {
+        welcome.style.display = 'none';
+        menu.style.display = 'block';
+
+        requestAnimationFrame(() => {
+          menu.style.opacity = '1';
+          menu.style.transform = 'translateY(0)';
+          card.classList.add('show');
+        });
+      }, 400);
+    }
+
+    function hideMenu() {
+      const welcome = document.getElementById('welcome-screen');
+      const menu = document.getElementById('menu-screen');
+      const card = document.getElementById('menuCard');
+
+      menu.style.opacity = '0';
+      menu.style.transform = 'translateY(20px)';
+
+      setTimeout(() => {
+        menu.style.display = 'none';
+        card.classList.remove('show');
+        welcome.style.display = 'flex';
+
+        requestAnimationFrame(() => {
+          welcome.style.opacity = '1';
+          welcome.style.transform = 'scale(1)';
+        });
+      }, 400);
+    }
+  </script>
+</body>
+
+</html>

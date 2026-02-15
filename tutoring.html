@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HDR Smart Attendance</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- เพิ่ม SweetAlert2 CSS และ JS -->
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-body: #080510;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-card-hover: rgba(255, 255, 255, 0.07);
+            --primary: #818cf8;
+            --primary-rgb: 129, 140, 248;
+            --primary-dim: rgba(129, 140, 248, 0.12);
+            --accent: #a78bfa;
+            --accent-rgb: 167, 139, 250;
+            --cyan: #22d3ee;
+            --cyan-rgb: 34, 211, 238;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --danger-bg: rgba(248, 113, 113, 0.1);
+            --border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* === FLOATING ORBS BG === */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            overflow: hidden;
+        }
+
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.45;
+            animation: orbFloat 20s ease-in-out infinite alternate;
+        }
+
+        .bg-orb:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            top: -8%;
+            left: -5%;
+            background: rgba(var(--primary-rgb), 0.3);
+            animation-duration: 18s;
+        }
+
+        .bg-orb:nth-child(2) {
+            width: 420px;
+            height: 420px;
+            bottom: -10%;
+            right: -8%;
+            background: rgba(var(--accent-rgb), 0.22);
+            animation-duration: 24s;
+            animation-delay: -6s;
+        }
+
+        .bg-orb:nth-child(3) {
+            width: 300px;
+            height: 300px;
+            top: 50%;
+            left: 55%;
+            background: rgba(var(--cyan-rgb), 0.1);
+            animation-duration: 28s;
+            animation-delay: -12s;
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-25px, 35px) scale(0.95);
+            }
+
+            100% {
+                transform: translate(20px, -20px) scale(1.05);
+            }
+        }
+
+        /* Noise texture */
+        .bg-noise {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.025;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px;
+        }
+
+        /* === MAIN LAYOUT === */
+        .app-container {
+            width: 100%;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            animation: containerEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes containerEnter {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Admin Button */
+        .admin-trigger {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            color: var(--primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .admin-trigger:hover {
+            color: #fff;
+            background: rgba(var(--primary-rgb), 0.2);
+            transform: scale(1.08) rotate(8deg);
+            box-shadow: 0 0 25px rgba(var(--primary-rgb), 0.2);
+        }
+
+        /* === LEFT INFO SECTION === */
+        .info-section {
+            background: rgba(10, 8, 20, 0.5);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url('https://i.ibb.co/8ng4Mzhg/569683175-1613136383409751-2510789747609789095-n.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.08;
+            z-index: 0;
+        }
+
+        .info-section::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(to top, rgba(10, 8, 20, 0.8), transparent);
+            z-index: 0;
+        }
+
+        .info-section>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 3D Logo Container - หมุนอัตโนมัติ */
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            perspective: 1200px;
+            margin-bottom: 24px;
+        }
+
+        .logo-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            animation: autoRotate 12s infinite linear;
+        }
+
+        /* หมุนอัตโนมัติตลอดเวลา */
+        @keyframes autoRotate {
+            0% {
+                transform: rotateY(0deg);
+            }
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+
+        /* หยุดหมุนชั่วคราวเมื่อ hover */
+        .logo-container:hover .logo-wrapper {
+            animation-play-state: paused;
+        }
+
+        .logo-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backface-visibility: visible;
+            -webkit-backface-visibility: visible;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 40px rgba(var(--primary-rgb), 0.12);
+            overflow: hidden;
+        }
+
+        /* Spinning ring effect */
+        .logo-face::before {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg,
+                    rgba(var(--primary-rgb), 0.5),
+                    transparent 25%,
+                    rgba(var(--accent-rgb), 0.4) 50%,
+                    transparent 75%,
+                    rgba(var(--cyan-rgb), 0.3));
+            animation: ringSpin 5s linear infinite;
+            z-index: -1;
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+        }
+
+        @keyframes ringSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .logo-face.front {
+            transform: rotateY(0deg);
+        }
+
+        .logo-face.back {
+            transform: rotateY(180deg);
+        }
+
+        /* Mirror effect for back face */
+        .logo-face.back .logo-img {
+            transform: scaleX(-1);
+        }
+
+        .logo-img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
+        }
+
+        /* Clock */
+        .clock-display {
+            font-size: 3.8rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 8px 0;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, rgba(var(--primary-rgb), 1) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(var(--primary-rgb), 0.25));
+            animation: clockEnter 0.6s ease-out 0.4s both, clockPulse 4s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes clockEnter {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes clockPulse {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 20px rgba(var(--primary-rgb), 0.25));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 35px rgba(var(--primary-rgb), 0.45));
+            }
+        }
+
+        .date-display {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            z-index: 1;
+            animation: fadeInUp 0.6s ease-out 0.5s both;
+        }
+
+        /* Network Status - WiFi / Ping กลับมาแล้ว */
+        .network-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 50px;
+            padding: 8px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .wifi-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+            filter: drop-shadow(0 0 5px rgba(var(--primary-rgb), 0.3));
+        }
+
+        .ping-info {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .ping-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .ping-unit {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .ping-bar {
+            width: 60px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-left: 5px;
+        }
+
+        .ping-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .ping-fill.excellent { background: linear-gradient(90deg, #34d399, #10b981); }
+        .ping-fill.good { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .ping-fill.poor { background: linear-gradient(90deg, #f87171, #ef4444); }
+
+        /* === RIGHT ACTION SECTION === */
+        .action-section {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        h2.section-title {
+            margin: 0 0 25px 0;
+            font-size: 1.3rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            animation: fadeInUp 0.5s ease-out 0.3s both;
+        }
+
+        h2.section-title i {
+            font-size: 1.4rem;
+            filter: drop-shadow(0 0 8px rgba(var(--primary-rgb), 0.4));
+        }
+
+        /* Slot Cards - ปรับให้มี indicator */
+        .slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .slot-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cardEnter 0.5s ease-out both;
+        }
+
+        .slot-card:nth-child(1) {
+            animation-delay: 0.35s;
+        }
+
+        .slot-card:nth-child(2) {
+            animation-delay: 0.45s;
+        }
+
+        /* Status Indicator - จุดเล็กๆ */
+        .slot-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .slot-status.open {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .slot-status.closed {
+            background-color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .slot-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+            transition: left 0.5s;
+            pointer-events: none;
+        }
+
+        .slot-card:hover:not(.disabled)::before {
+            left: 150%;
+        }
+
+        .slot-card:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(var(--primary-rgb), 0.3);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(var(--primary-rgb), 0.06);
+        }
+
+        .slot-card.active {
+            background: rgba(var(--primary-rgb), 0.1);
+            border-color: rgba(var(--primary-rgb), 0.4);
+            box-shadow: 0 0 25px rgba(var(--primary-rgb), 0.12), inset 0 0 20px rgba(var(--primary-rgb), 0.05);
+        }
+
+        .slot-card.active::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(var(--primary-rgb), 0.6), transparent);
+        }
+
+        .slot-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(0, 0, 0, 0.2);
+            filter: grayscale(0.5);
+        }
+
+        .slot-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            display: block;
+            filter: drop-shadow(0 0 8px currentColor);
+            transition: transform 0.3s;
+        }
+
+        .slot-card:hover:not(.disabled) .slot-icon {
+            transform: scale(1.15);
+        }
+
+        .slot-name {
+            font-weight: 500;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .slot-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+            font-weight: 300;
+        }
+
+        /* Input */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.5s ease-out 0.55s both;
+        }
+
+        .input-group>i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .input-group:focus-within>i {
+            color: var(--primary);
+        }
+
+        .main-input {
+            width: 100%;
+            padding: 16px 16px 16px 44px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-family: 'Kanit';
+            font-weight: 300;
+            outline: none;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+            font-weight: 200;
+        }
+
+        .main-input:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(var(--primary-rgb), 0.4);
+            box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.1), 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Main Button */
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-family: 'Kanit';
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.25);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease-out 0.65s both;
+        }
+
+        .btn-main::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 60%);
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 8px 30px rgba(var(--primary-rgb), 0.35);
+        }
+
+        .btn-main:active {
+            transform: scale(0.97);
+        }
+
+        /* Back Button */
+        .btn-back {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            font-family: 'Kanit';
+            font-size: 0.95rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: fadeInUp 0.5s ease-out 0.75s both;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--text-main);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-back:active {
+            transform: translateY(0);
+        }
+
+        .btn-back i {
+            font-size: 1rem;
+        }
+
+        .footer-credit {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.35;
+            letter-spacing: 0.5px;
+            animation: fadeInUp 0.5s ease-out 0.85s both;
+        }
+
+        /* === ADMIN PANEL === */
+        #adminPanel {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 25px;
+            overflow-y: auto;
+            background: rgba(8, 5, 16, 0.95);
+        }
+
+        #adminPanel.show {
+            display: block;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 14px;
+            border-radius: 14px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+            background: rgba(248, 113, 113, 0.06);
+            border-color: rgba(248, 113, 113, 0.15);
+        }
+
+        .stat-card.clickable:hover {
+            background: rgba(248, 113, 113, 0.12);
+            box-shadow: 0 0 20px rgba(248, 113, 113, 0.08);
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .stat-lbl {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .control-strip {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .pill-btn {
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: 'Kanit';
+            white-space: nowrap;
+            transition: all 0.25s;
+        }
+
+        .pill-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .pill-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.25);
+        }
+
+        .pill-btn.danger {
+            color: var(--danger);
+            border-color: rgba(248, 113, 113, 0.2);
+        }
+
+        .pill-btn.danger.active {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 0 15px rgba(248, 113, 113, 0.25);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-select {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Kanit';
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .filter-select:focus {
+            border-color: rgba(var(--primary-rgb), 0.3);
+        }
+
+        /* List Items */
+        .dual-list-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .list-item-dual {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 6px;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.25s;
+        }
+
+        .list-item-dual:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .stu-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stu-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .stu-id {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.73rem;
+            gap: 5px;
+            width: 100%;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status-pill.success {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(52, 211, 153, 0.12);
+        }
+
+        .status-pill.warning {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(251, 191, 36, 0.12);
+        }
+
+        .status-pill.missing {
+            background: rgba(248, 113, 113, 0.08);
+            color: var(--danger);
+            border: 1px solid rgba(248, 113, 113, 0.12);
+        }
+
+        /* Absent Modal */
+        .absent-summary-box {
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.12), rgba(127, 29, 29, 0.12));
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .absent-count-big {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(248, 113, 113, 0.3));
+        }
+
+        .absent-text-sub {
+            color: rgba(248, 113, 113, 0.6);
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        .absent-class-header {
+            font-size: 0.85rem;
+            color: rgba(248, 113, 113, 0.6);
+            margin: 25px 0 10px 0;
+            padding-left: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(248, 113, 113, 0.1);
+            padding-bottom: 6px;
+        }
+
+        .absent-card {
+            background: rgba(248, 113, 113, 0.04);
+            border: 1px solid rgba(248, 113, 113, 0.1);
+            border-left: 3px solid rgba(248, 113, 113, 0.4);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.25s;
+        }
+
+        .absent-card:hover {
+            transform: translateX(5px);
+            background: rgba(248, 113, 113, 0.08);
+            box-shadow: 0 4px 15px rgba(248, 113, 113, 0.06);
+        }
+
+        .absent-info .name {
+            font-weight: 500;
+            color: #f87171;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .absent-info .id {
+            font-size: 0.78rem;
+            color: rgba(248, 113, 113, 0.5);
+        }
+
+        .absent-badge {
+            background: rgba(248, 113, 113, 0.08);
+            color: #f87171;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.73rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid rgba(248, 113, 113, 0.12);
+        }
+
+        /* === MODALS === */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(16px);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-box {
+            background: linear-gradient(160deg, rgba(20, 12, 45, 0.97), rgba(12, 8, 25, 0.98));
+            width: 90%;
+            max-width: 420px;
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            transform: scale(0.9) translateY(15px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(var(--primary-rgb), 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(var(--primary-rgb), 0.4), transparent);
+        }
+
+        .overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-large {
+            max-width: 600px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            text-align: left;
+        }
+
+        .modal-header-l {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(248, 113, 113, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 8, 8, 0.9);
+        }
+
+        .modal-body-l {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(8, 5, 16, 0.95);
+        }
+
+        /* === ANIMATIONS === */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 850px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .info-section {
+                padding: 30px 20px;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            }
+
+            .clock-display {
+                font-size: 3rem;
+            }
+
+            .dual-list-header {
+                display: none;
+            }
+
+            .list-item-dual {
+                grid-template-columns: 1fr auto auto;
+                gap: 8px;
+            }
+
+            .status-pill {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+                width: auto;
+            }
+
+            .status-pill i {
+                display: none;
+            }
+
+            .admin-trigger {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+                top: 10px;
+                right: 10px;
+                border-radius: 12px;
+            }
+
+            .bg-orb:nth-child(1) {
+                width: 300px;
+                height: 300px;
+            }
+
+            .bg-orb:nth-child(2) {
+                width: 250px;
+                height: 250px;
+            }
+
+            .bg-orb:nth-child(3) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background Effects -->
+    <div class="bg-mesh">
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+    </div>
+    <div class="bg-noise"></div>
+
+    <div class="app-container">
+        <i class="fa-solid fa-sliders admin-trigger" onclick="openLogin()"></i>
+
+        <div class="info-section">
+            <div class="logo-container">
+                <div class="logo-wrapper">
+                    <div class="logo-face front">
+                        <img src="https://media.discordapp.net/attachments/1282030855119966349/1471524189373599795/23c307897ed1e453.png?ex=698f3f32&is=698dedb2&hm=69b22e5494a63341d8d75bbc5496eb2dc1f6045d0cf1fe98818aeb8bcedf6b35&=&format=webp&quality=lossless&width=648&height=648"
+                            class="logo-img">
+                    </div>
+                    <div class="logo-face back">
+                        <img src="https://media.discordapp.net/attachments/1282030855119966349/1471524189373599795/23c307897ed1e453.png?ex=698f3f32&is=698dedb2&hm=69b22e5494a63341d8d75bbc5496eb2dc1f6045d0cf1fe98818aeb8bcedf6b35&=&format=webp&quality=lossless&width=648&height=648"
+                            class="logo-img">
+                    </div>
+                </div>
+            </div>
+
+            <div id="liveClock" class="clock-display">00:00</div>
+            <div id="liveDate" class="date-display">...</div>
+
+            <!-- Network Status (WiFi + Ping) กลับมาแล้ว -->
+            <div class="network-status" id="networkStatus">
+                <i class="fa-solid fa-wifi wifi-icon"></i>
+                <div class="ping-info">
+                    <span class="ping-value" id="pingValue">0</span>
+                    <span class="ping-unit">ms</span>
+                </div>
+                <div class="ping-bar">
+                    <div class="ping-fill" id="pingBar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-section" id="studentView">
+            <h2 class="section-title"><i class="fa-solid fa-user-check" style="color:var(--primary)"></i>
+                ลงชื่อเข้าเรียน</h2>
+
+            <div class="slot-grid">
+                <div class="slot-card" id="slot-morning" onclick="selectSlot('morning')">
+                    <div class="slot-status" id="morning-status"></div>
+                    <i class="fa-regular fa-sun slot-icon" style="color: #f59e0b;"></i>
+                    <span class="slot-name">รอบเช้า</span>
+                    <span class="slot-time">08:30 - 09:10</span>
+                </div>
+                <div class="slot-card" id="slot-afternoon" onclick="selectSlot('afternoon')">
+                    <div class="slot-status" id="afternoon-status"></div>
+                    <i class="fa-regular fa-moon slot-icon" style="color: #6366f1;"></i>
+                    <span class="slot-name">รอบบ่าย</span>
+                    <span class="slot-time">12:30 - 13:10</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-fingerprint"></i>
+                <input type="tel" id="studentId" class="main-input" placeholder="เลขประจำตัวนักเรียน" maxlength="10"
+                    autocomplete="off">
+            </div>
+
+            <button id="btnSubmit" onclick="submitAttendance()" class="btn-main">ยืนยันการลงชื่อ</button>
+
+            <!-- ปุ่มกลับเมนูหลัก -->
+            <button onclick="goToMainMenu()" class="btn-back">
+                <i class="fa-solid fa-arrow-left"></i> กลับเมนูหลัก
+            </button>
+
+            <div class="footer-credit">Developed by Room 6/7</div>
+        </div>
+
+        <div id="adminPanel">
+            <div class="admin-header">
+                <div>
+                    <h3 style="margin:0; color:#fff;">Admin Dashboard</h3>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">ระบบตรวจสอบแบบ Realtime</span>
+                </div>
+                <div>
+                    <button onclick="window.location.href='https://bathroom-check-system.web.app/admin.html'"
+                        class="pill-btn" style="border-color:rgba(96, 165, 250, 0.3); color:#60a5fa;">
+                        <i class="fa-solid fa-pen-to-square"></i> แก้ไขรายชื่อ
+                    </button>
+                    <button onclick="logout()" class="pill-btn danger" style="margin-left:5px;">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="control-strip">
+                <button onclick="setSystemMode('auto')" class="pill-btn" id="btn-mode-auto">Auto</button>
+                <button onclick="setSystemMode('manual_morning')" class="pill-btn"
+                    id="btn-mode-morning">เปิดเช้า</button>
+                <button onclick="setSystemMode('manual_afternoon')" class="pill-btn"
+                    id="btn-mode-afternoon">เปิดบ่าย</button>
+                <button onclick="setSystemMode('closed')" class="pill-btn danger" id="btn-mode-closed">ปิดระบบ</button>
+            </div>
+
+            <div class="stat-bar">
+                <div class="stat-card">
+                    <span class="stat-val" id="schoolTotal">0</span>
+                    <span class="stat-lbl">ทั้งหมด</span>
+                </div>
+                <div class="stat-card" style="background:rgba(245, 158, 11, 0.1); border-color:rgba(245, 158, 11, 0.2)">
+                    <span class="stat-val" id="schoolMorning" style="color:#f59e0b">0</span>
+                    <span class="stat-lbl">มาเช้า</span>
+                </div>
+                <div class="stat-card" style="background:rgba(99, 102, 241, 0.1); border-color:rgba(99, 102, 241, 0.2)">
+                    <span class="stat-val" id="schoolAfternoon" style="color:#818cf8">0</span>
+                    <span class="stat-lbl">มาบ่าย</span>
+                </div>
+                <div class="stat-card clickable" onclick="showGlobalAbsent()">
+                    <span class="stat-val" id="schoolAbsent" style="color:#ef4444">0</span>
+                    <span class="stat-lbl"><i class="fa-solid fa-hand-point-up"></i> ขาด (รวม)</span>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <select id="classSelect" class="filter-select">
+                    <option value="6/1">ห้อง 6/1</option>
+                    <option value="6/2">ห้อง 6/2</option>
+                    <option value="6/3">ห้อง 6/3</option>
+                    <option value="6/4">ห้อง 6/4</option>
+                    <option value="6/5">ห้อง 6/5</option>
+                    <option value="6/6">ห้อง 6/6</option>
+                    <option value="6/7">ห้อง 6/7</option>
+                </select>
+                <div
+                    style="flex:1; display:flex; align-items:center; justify-content:flex-end; color:var(--text-muted); font-size:0.9rem;">
+                    <span id="classCount">0</span> คน
+                </div>
+            </div>
+
+            <div class="dual-list-header">
+                <div>ชื่อ - สกุล</div>
+                <div style="text-align:center;">รอบเช้า</div>
+                <div style="text-align:center;">รอบบ่าย</div>
+            </div>
+
+            <div id="dualListContainer"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="resultOverlay">
+        <div class="modal-box">
+            <i id="resIcon" class="fa-solid fa-circle-check"
+                style="font-size:3.5rem; color:var(--success); margin-bottom:15px;"></i>
+            <h2 id="resTitle" style="margin:0 0 5px 0; color:#fff;">เรียบร้อย</h2>
+            <p id="resName" style="color:var(--text-muted); margin:0;">...</p>
+        </div>
+    </div>
+
+    <div class="overlay" id="loginModal">
+        <div class="modal-box">
+            <h3 style="margin-top:0; color:#fff;">Admin Access</h3>
+            <input type="email" id="loginEmail" class="main-input" placeholder="Email" style="margin-bottom:10px;">
+            <input type="password" id="loginPass" class="main-input" placeholder="Password" style="margin-bottom:20px;">
+            <button onclick="verifyLogin()" class="btn-main" style="margin-bottom:10px;">เข้าสู่ระบบ</button>
+            <button onclick="closeLogin()" class="pill-btn" style="width:100%; border:none;">ยกเลิก</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="absentModal">
+        <div class="modal-box modal-large">
+            <div class="modal-header-l">
+                <h3 style="margin:0; color:#ff6b6b; font-size:1.2rem;"><i class="fa-solid fa-triangle-exclamation"></i>
+                    รายชื่อคนขาด</h3>
+                <button onclick="document.getElementById('absentModal').classList.remove('active')" class="pill-btn"
+                    style="padding:5px 12px; border:none; color:#ff6b6b;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body-l" id="absentModalList"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIG & SETUP ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVPuFr9DQKlpG8eeX5Jvr8TmcEH_7i7uM",
+            authDomain: "bathroom-check-system.firebaseapp.com",
+            projectId: "bathroom-check-system",
+            storageBucket: "bathroom-check-system.firebasestorage.app",
+            messagingSenderId: "738596491428",
+            appId: "1:738596491428:web:756904f5c62ee5fe081631"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        const getFormattedDate = () => {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        };
+
+        // State
+        let selectedSlot = null;
+        let systemMode = 'auto';
+        let adminListenerUnsubscribe = null;
+        let allStudentsCache = [];
+        let logsCache = { morning: {}, afternoon: {} };
+        let todaysLogs = [];
+        let pingHistory = [];
+
+        // UI Refs
+        const els = {
+            clock: document.getElementById('liveClock'),
+            date: document.getElementById('liveDate'),
+            pingValue: document.getElementById('pingValue'),
+            pingBar: document.getElementById('pingBar'),
+            slots: { 
+                morning: document.getElementById('slot-morning'), 
+                afternoon: document.getElementById('slot-afternoon') 
+            },
+            slotStatus: {
+                morning: document.getElementById('morning-status'),
+                afternoon: document.getElementById('afternoon-status')
+            },
+            input: document.getElementById('studentId'),
+            btnSubmit: document.getElementById('btnSubmit'),
+            views: { student: document.getElementById('studentView'), admin: document.getElementById('adminPanel') }
+        };
+
+        // --- PING MEASUREMENT ---
+        async function measurePing() {
+            const start = performance.now();
+            try {
+                // ทำ request ไปยัง Firebase เพื่อวัดเวลา
+                await db.collection("config").doc("systemState").get();
+                const end = performance.now();
+                const ping = Math.round(end - start);
+                
+                // เก็บค่า ping ใน history (สูงสุด 5 ค่า)
+                pingHistory.push(ping);
+                if (pingHistory.length > 5) pingHistory.shift();
+                
+                // ค่าเฉลี่ย
+                const avgPing = Math.round(pingHistory.reduce((a, b) => a + b, 0) / pingHistory.length);
+                
+                // อัพเดท UI
+                els.pingValue.textContent = avgPing;
+                
+                // ปรับแต่งแถบตามค่า ping
+                let percentage = Math.min(100, Math.max(10, 100 - (avgPing / 2)));
+                els.pingBar.style.width = percentage + '%';
+                
+                // เปลี่ยนสีตามคุณภาพ
+                els.pingBar.className = 'ping-fill';
+                if (avgPing < 50) {
+                    els.pingBar.classList.add('excellent');
+                } else if (avgPing < 150) {
+                    els.pingBar.classList.add('good');
+                } else {
+                    els.pingBar.classList.add('poor');
+                }
+                
+            } catch (error) {
+                console.error('Ping measurement failed:', error);
+                els.pingValue.textContent = 'ERR';
+                els.pingBar.style.width = '10%';
+                els.pingBar.className = 'ping-fill poor';
+            }
+        }
+
+        // วัด ping ทุก 5 วินาที
+        setInterval(measurePing, 5000);
+        // วัดครั้งแรกทันที
+        setTimeout(measurePing, 100);
+
+        // --- TIME & MODE (ระบบเปิดปิดหลังบ้าน) ---
+        function updateTime() {
+            const now = new Date();
+            els.clock.textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            els.date.textContent = now.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
+
+            const mins = (now.getHours() * 60) + now.getMinutes();
+            let activeSlot = null;
+
+            if (systemMode === 'closed') { 
+                // ปิดระบบ
+            }
+            else if (systemMode.startsWith('manual_')) {
+                activeSlot = systemMode.split('_')[1];
+            } else {
+                if (mins >= 510 && mins <= 550) {
+                    activeSlot = 'morning';
+                } else if (mins >= 750 && mins <= 790) {
+                    activeSlot = 'afternoon';
+                }
+            }
+            
+            // อัพเดทสถานะจุดใน card
+            updateSlotIndicators(activeSlot);
+            
+            // อัพเดทการ enable/disable card
+            Object.keys(els.slots).forEach(k => {
+                if (k === activeSlot) {
+                    els.slots[k].classList.remove('disabled');
+                } else {
+                    els.slots[k].classList.add('disabled');
+                    if (selectedSlot === k && !systemMode.startsWith('manual')) deselectSlot();
+                }
+            });
+        }
+
+        function updateSlotIndicators(activeSlot) {
+            const mins = (new Date().getHours() * 60) + new Date().getMinutes();
+            
+            // รอบเช้า
+            if ((activeSlot === 'morning' && systemMode !== 'closed') || 
+                (systemMode === 'manual_morning') ||
+                (systemMode === 'auto' && mins >= 510 && mins <= 550)) {
+                els.slotStatus.morning.className = 'slot-status open';
+            } else {
+                els.slotStatus.morning.className = 'slot-status closed';
+            }
+
+            // รอบบ่าย
+            if ((activeSlot === 'afternoon' && systemMode !== 'closed') || 
+                (systemMode === 'manual_afternoon') ||
+                (systemMode === 'auto' && mins >= 750 && mins <= 790)) {
+                els.slotStatus.afternoon.className = 'slot-status open';
+            } else {
+                els.slotStatus.afternoon.className = 'slot-status closed';
+            }
+
+            // กรณีปิดระบบ
+            if (systemMode === 'closed') {
+                els.slotStatus.morning.className = 'slot-status closed';
+                els.slotStatus.afternoon.className = 'slot-status closed';
+            }
+        }
+
+        setInterval(updateTime, 1000);
+
+        // --- STUDENT LOGIC ---
+        window.selectSlot = (slot) => {
+            if (els.slots[slot].classList.contains('disabled')) return;
+            selectedSlot = slot;
+            Object.values(els.slots).forEach(el => el.classList.remove('active'));
+            els.slots[slot].classList.add('active');
+            els.input.focus();
+        };
+
+        function deselectSlot() {
+            selectedSlot = null;
+            Object.values(els.slots).forEach(el => el.classList.remove('active'));
+        }
+
+        async function checkDuplicateAttendance(id, slot) {
+            const dateStr = getFormattedDate();
+            const docId = `${dateStr}_${slot}_${id}`;
+
+            try {
+                const docRef = await db.collection("attendanceLogs").doc(docId).get();
+                return docRef.exists;
+            } catch (error) {
+                console.error("Error checking duplicate:", error);
+                return false;
+            }
+        }
+
+        window.submitAttendance = async () => {
+            if (!selectedSlot) {
+                showModal(false, 'กรุณาเลือกช่วงเวลา');
+                return;
+            }
+
+            const id = els.input.value.trim();
+            if (!id || id.length < 3) {
+                showModal(false, 'กรุณากรอกเลขประจำตัวให้ถูกต้อง');
+                return;
+            }
+
+            els.btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            try {
+                const studentDoc = await db.collection("students").doc(id).get();
+                if (!studentDoc.exists) {
+                    showModal(false, 'ไม่พบรหัสนักเรียนนี้');
+                    els.btnSubmit.textContent = 'ยืนยันการลงชื่อ';
+                    return;
+                }
+
+                const stu = studentDoc.data();
+                const isDuplicate = await checkDuplicateAttendance(id, selectedSlot);
+
+                if (isDuplicate) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ลงชื่อซ้ำ',
+                        html: `คุณ <span style="color:var(--warning); font-weight:600;">${stu.name}</span> ได้ลงชื่อรอบ${selectedSlot === 'morning' ? 'เช้า' : 'บ่าย'}ไปแล้ว`,
+                        timer: 3000,
+                        showConfirmButton: false,
+                        position: 'top-end',
+                        toast: true,
+                        background: '#1e293b',
+                        color: '#e2e8f0'
+                    });
+                    els.input.value = '';
+                    els.btnSubmit.textContent = 'ยืนยันการลงชื่อ';
+                    return;
+                }
+
+                const now = new Date();
+                const mins = (now.getHours() * 60) + now.getMinutes();
+                let status = "ปกติ";
+
+                if ((selectedSlot === 'morning' && mins > 550) || (selectedSlot === 'afternoon' && mins > 790)) {
+                    status = "มาสาย";
+                }
+
+                const dateStr = getFormattedDate();
+                await db.collection("attendanceLogs").doc(`${dateStr}_${selectedSlot}_${id}`).set({
+                    studentId: id,
+                    name: stu.name,
+                    class: stu.class,
+                    slot: selectedSlot,
+                    date: dateStr,
+                    time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                    status: status,
+                    timestamp: now.getTime()
+                });
+
+                showModal(true, stu.name, status);
+                els.input.value = '';
+                els.input.focus();
+
+            } catch (e) {
+                console.error("Error in submitAttendance:", e);
+                showModal(false, e.message || 'เกิดข้อผิดพลาด');
+            }
+
+            els.btnSubmit.textContent = 'ยืนยันการลงชื่อ';
+        };
+
+        function showModal(success, title, subtitle) {
+            const m = document.getElementById('resultOverlay');
+            const i = document.getElementById('resIcon');
+            const t = document.getElementById('resTitle');
+            const d = document.getElementById('resName');
+
+            i.className = success ? (subtitle === 'มาสาย' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check') : 'fa-solid fa-circle-xmark';
+            i.style.color = success ? (subtitle === 'มาสาย' ? 'var(--warning)' : 'var(--success)') : 'var(--danger)';
+            t.textContent = success ? (subtitle === 'มาสาย' ? 'มาสายนะครับ' : 'บันทึกสำเร็จ') : 'เกิดข้อผิดพลาด';
+            d.textContent = title;
+            m.classList.add('active');
+            setTimeout(() => m.classList.remove('active'), 2000);
+        }
+
+        els.input.addEventListener("keypress", (e) => { if (e.key === "Enter") window.submitAttendance(); });
+
+        // --- ADMIN & AUTH ---
+        window.openLogin = function () {
+            console.log('Opening admin login...');
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        window.closeLogin = function () {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        window.goToMainMenu = function () {
+            window.location.href = 'https://bathroom-check-system.web.app/all.html';
+        }
+
+        window.verifyLogin = () => {
+            auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value)
+                .catch(e => alert(e.message));
+        };
+        window.logout = () => auth.signOut();
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                closeLogin();
+                els.views.student.style.display = 'none';
+                document.querySelector('.info-section').style.display = 'none';
+                document.querySelector('.app-container').style.gridTemplateColumns = '1fr';
+                els.views.admin.classList.add('show');
+                document.querySelector('.admin-trigger').style.display = 'none';
+                await initAdmin();
+            } else {
+                els.views.student.style.display = 'flex';
+                document.querySelector('.info-section').style.display = 'flex';
+                document.querySelector('.app-container').style.gridTemplateColumns = '';
+                els.views.admin.classList.remove('show');
+                document.querySelector('.admin-trigger').style.display = 'flex';
+                if (adminListenerUnsubscribe) adminListenerUnsubscribe();
+            }
+        });
+
+        window.setSystemMode = (m) => db.collection("config").doc("systemState").set({ mode: m }, { merge: true });
+        db.collection("config").doc("systemState").onSnapshot(doc => {
+            if (doc.exists) {
+                systemMode = doc.data().mode || 'auto';
+                document.querySelectorAll('.control-strip .pill-btn').forEach(b => b.classList.remove('active'));
+                const btnId = systemMode.startsWith('manual_') ? systemMode.split('_')[1] : systemMode;
+                const btn = document.getElementById(`btn-mode-${btnId}`);
+                if (btn) btn.classList.add('active');
+                updateTime();
+            }
+        });
+
+        // --- ADMIN DATA ---
+        async function initAdmin() {
+            const s = await db.collection("students").get();
+            allStudentsCache = [];
+            s.forEach(d => allStudentsCache.push({ id: d.id, ...d.data() }));
+
+            const today = getFormattedDate();
+            if (adminListenerUnsubscribe) adminListenerUnsubscribe();
+
+            adminListenerUnsubscribe = db.collection("attendanceLogs")
+                .where("date", "==", today)
+                .onSnapshot(snap => {
+                    logsCache = { morning: {}, afternoon: {} };
+                    todaysLogs = [];
+
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        todaysLogs.push(d);
+                        if (d.slot === 'morning') logsCache.morning[d.studentId] = d;
+                        if (d.slot === 'afternoon') logsCache.afternoon[d.studentId] = d;
+                    });
+
+                    renderAdminUI();
+                });
+        }
+
+        document.getElementById('classSelect').addEventListener('change', renderAdminUI);
+
+        function renderAdminUI() {
+            const cls = document.getElementById('classSelect').value;
+            const targets = allStudentsCache.filter(s => s.class === cls).sort((a, b) => a.id - b.id);
+
+            const totalStu = allStudentsCache.length;
+            const totalMorning = Object.keys(logsCache.morning).length;
+            const totalAfternoon = Object.keys(logsCache.afternoon).length;
+            const h = new Date().getHours();
+            const currentSlotKey = (h >= 12) ? 'afternoon' : 'morning';
+            const currentPresent = (currentSlotKey === 'morning') ? totalMorning : totalAfternoon;
+            const totalAbsent = totalStu - currentPresent;
+
+            document.getElementById('schoolTotal').textContent = totalStu;
+            document.getElementById('schoolMorning').textContent = totalMorning;
+            document.getElementById('schoolAfternoon').textContent = totalAfternoon;
+            document.getElementById('schoolAbsent').textContent = totalAbsent;
+            document.getElementById('classCount').textContent = targets.length;
+
+            let html = '';
+            targets.forEach(stu => {
+                const logM = logsCache.morning[stu.id];
+                const logA = logsCache.afternoon[stu.id];
+
+                const getPill = (log) => {
+                    if (!log) return `<span class="status-pill missing"><i class="fa-solid fa-xmark"></i> ขาด</span>`;
+                    const isLate = log.status === 'มาสาย';
+                    return `<span class="status-pill ${isLate ? 'warning' : 'success'}">
+                                ${isLate ? '<i class="fa-solid fa-person-running"></i>' : '<i class="fa-solid fa-check"></i>'} 
+                                ${log.time}
+                            </span>`;
+                };
+
+                html += `
+                <div class="list-item-dual">
+                    <div class="stu-info">
+                        <span class="stu-name">${stu.name}</span>
+                        <span class="stu-id">${stu.id}</span>
+                    </div>
+                    <div>${getPill(logM)}</div>
+                    <div>${getPill(logA)}</div>
+                </div>`;
+            });
+            document.getElementById('dualListContainer').innerHTML = html;
+        }
+
+        // --- GLOBAL ABSENT LOGIC ---
+        window.showGlobalAbsent = () => {
+            const h = new Date().getHours();
+            const targetSlot = (h >= 12) ? 'afternoon' : 'morning';
+            const targetLogs = logsCache[targetSlot];
+            const presentIds = new Set(Object.keys(targetLogs));
+
+            const absentList = allStudentsCache.filter(s => !presentIds.has(s.id))
+                .sort((a, b) => a.class.localeCompare(b.class) || a.id.localeCompare(b.id));
+
+            let html = `<div class="absent-summary-box">
+                            <div class="absent-count-big">${absentList.length}</div>
+                            <div class="absent-text-sub">นักเรียนที่ขาด (รอบ${targetSlot === 'morning' ? 'เช้า' : 'บ่าย'})</div>
+                        </div>`;
+
+            if (absentList.length === 0) {
+                html += `<div style="text-align:center; padding:40px; color:var(--success);">
+                            <i class="fa-solid fa-circle-check" style="font-size:3rem; margin-bottom:10px;"></i><br>มาครบทุกคนแล้ว!
+                          </div>`;
+            } else {
+                let curClass = '';
+                absentList.forEach(s => {
+                    if (s.class !== curClass) {
+                        html += `<div class="absent-class-header">ห้อง ${s.class}</div>`;
+                        curClass = s.class;
+                    }
+                    html += `
+                    <div class="absent-card">
+                        <div class="absent-info">
+                            <span class="name">${s.name}</span>
+                            <span class="id">รหัส: ${s.id}</span>
+                        </div>
+                        <div class="absent-badge">
+                            <i class="fa-solid fa-xmark"></i> ขาด
+                        </div>
+                    </div>`;
+                });
+            }
+
+            document.getElementById('absentModalList').innerHTML = html;
+            document.getElementById('absentModal').classList.add('active');
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const adminBtn = document.querySelector('.admin-trigger');
+            if (adminBtn) {
+                adminBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.openLogin();
+                });
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                e.preventDefault();
+                window.openLogin();
+            }
+        });
+
+    </script>
+</body>
+
+</html>
