@@ -6,17 +6,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HDR - Welcome</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon"
-    href="https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.ico">
-  <link rel="shortcut icon" type="image/x-icon"
-    href="https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.ico">
+  <!-- Favicon - Multiple formats for better mobile support -->
+  <!-- Primary favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.png">
+  
+  <!-- Apple Touch Icon (for iOS home screen) -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.png">
+  
+  <!-- Android Chrome -->
+  <link rel="manifest" href="data:application/manifest+json,{
+    &quot;name&quot;: &quot;HDR System&quot;,
+    &quot;icons&quot;: [
+      {
+        &quot;src&quot;: &quot;https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.png&quot;,
+        &quot;sizes&quot;: &quot;192x192&quot;,
+        &quot;type&quot;: &quot;image/png&quot;
+      },
+      {
+        &quot;src&quot;: &quot;https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.png&quot;,
+        &quot;sizes&quot;: &quot;512x512&quot;,
+        &quot;type&quot;: &quot;image/png&quot;
+      }
+    ]
+  }">
+  
+  <!-- Fallback with cache busting -->
+  <link rel="shortcut icon" href="https://gfvrvhlchpdjwlbeszfw.supabase.co/storage/v1/object/public/avatars/logo.png?v=2">
 
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
+    /* (CSS ส่วนที่เหลือเหมือนเดิมทั้งหมด) */
     :root {
       --glass-bg: rgba(20, 20, 20, 0.6);
       --glass-border: rgba(255, 255, 255, 0.1);
@@ -798,6 +821,21 @@
         });
       }, 400);
     }
+
+    // เพิ่ม script เพื่อบังคับให้โหลด favicon ใหม่ในมือถือ
+    document.addEventListener('DOMContentLoaded', function() {
+      // ตรวจสอบว่าเป็นมือถือหรือไม่
+      if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        // ลองโหลด favicon อีกรอบ
+        const links = document.querySelectorAll('link[rel*="icon"]');
+        links.forEach(link => {
+          if (link.href) {
+            const newHref = link.href.split('?')[0] + '?v=' + new Date().getTime();
+            link.href = newHref;
+          }
+        });
+      }
+    });
   </script>
 </body>
 
