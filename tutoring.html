@@ -58,7 +58,6 @@
         body {
             font-family: 'Kanit', sans-serif;
             background: #050505;
-            /* Darker Space Background */
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
@@ -67,7 +66,6 @@
             padding: 20px;
             overflow-x: hidden;
             position: relative;
-            /* Ensure body is relative for absolute children if needed */
         }
 
         /* === SPACE BACKGROUND === */
@@ -78,74 +76,11 @@
             width: 100%;
             height: 100%;
             z-index: -2;
-            /* Behind everything */
             background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-            /* Deep space gradient */
         }
 
-        /* Hide old orbs */
-        .bg-mesh,
-        .bg-orb {
-            display: none;
-        }
-
-        .bg-orb:nth-child(1) {
-            width: 500px;
-            height: 500px;
-            top: -8%;
-            left: -5%;
-            background: rgba(var(--primary-rgb), 0.3);
-            animation-duration: 18s;
-        }
-
-        .bg-orb:nth-child(2) {
-            width: 420px;
-            height: 420px;
-            bottom: -10%;
-            right: -8%;
-            background: rgba(var(--accent-rgb), 0.22);
-            animation-duration: 24s;
-            animation-delay: -6s;
-        }
-
-        .bg-orb:nth-child(3) {
-            width: 300px;
-            height: 300px;
-            top: 50%;
-            left: 55%;
-            background: rgba(var(--cyan-rgb), 0.1);
-            animation-duration: 28s;
-            animation-delay: -12s;
-        }
-
-        @keyframes orbFloat {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            33% {
-                transform: translate(30px, -50px) scale(1.1);
-            }
-
-            66% {
-                transform: translate(-25px, 35px) scale(0.95);
-            }
-
-            100% {
-                transform: translate(20px, -20px) scale(1.05);
-            }
-        }
-
-        /* Noise texture */
         .bg-noise {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            opacity: 0.025;
-            pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-            background-repeat: repeat;
-            background-size: 256px;
+            display: none;
         }
 
         /* === MAIN LAYOUT === */
@@ -183,7 +118,6 @@
                 opacity: 0;
                 transform: translateY(30px) scale(0.97);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -260,7 +194,7 @@
             z-index: 1;
         }
 
-        /* 3D Logo Container - หมุนอัตโนมัติ */
+        /* 3D Logo Container */
         .logo-container {
             width: 100px;
             height: 100px;
@@ -277,18 +211,15 @@
             animation: autoRotate 12s infinite linear;
         }
 
-        /* หมุนอัตโนมัติตลอดเวลา */
         @keyframes autoRotate {
             0% {
                 transform: rotateY(0deg);
             }
-
             100% {
                 transform: rotateY(360deg);
             }
         }
 
-        /* หยุดหมุนชั่วคราวเมื่อ hover */
         .logo-container:hover .logo-wrapper {
             animation-play-state: paused;
         }
@@ -310,7 +241,6 @@
             overflow: hidden;
         }
 
-        /* Spinning ring effect */
         .logo-face::before {
             content: "";
             position: absolute;
@@ -342,7 +272,6 @@
             transform: rotateY(180deg);
         }
 
-        /* Mirror effect for back face */
         .logo-face.back .logo-img {
             transform: scaleX(-1);
         }
@@ -363,12 +292,10 @@
             margin: 6px 0;
             font-variant-numeric: tabular-nums;
             letter-spacing: 2px;
-            /* Match Button Gradient: Primary -> Accent */
             background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            /* Subtle Primary Glow */
             filter: drop-shadow(0 0 15px rgba(129, 140, 248, 0.4));
             animation: clockEnter 0.6s ease-out 0.4s both;
             z-index: 1;
@@ -379,22 +306,9 @@
                 opacity: 0;
                 transform: translateY(15px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
-            }
-        }
-
-        @keyframes clockPulse {
-
-            0%,
-            100% {
-                filter: drop-shadow(0 0 20px rgba(var(--primary-rgb), 0.25));
-            }
-
-            50% {
-                filter: drop-shadow(0 0 35px rgba(var(--primary-rgb), 0.45));
             }
         }
 
@@ -408,7 +322,7 @@
             animation: fadeInUp 0.6s ease-out 0.5s both;
         }
 
-        /* Network Status - WiFi / Ping กลับมาแล้ว */
+        /* Network Status */
         .network-status {
             display: flex;
             align-items: center;
@@ -499,7 +413,7 @@
             filter: drop-shadow(0 0 8px rgba(var(--primary-rgb), 0.4));
         }
 
-        /* Slot Cards - ปรับให้มี indicator */
+        /* Slot Cards */
         .slot-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -528,7 +442,6 @@
             animation-delay: 0.45s;
         }
 
-        /* Status Indicator - จุดเล็กๆ */
         .slot-status {
             position: absolute;
             top: 12px;
@@ -791,6 +704,7 @@
             flex-direction: column;
             justify-content: center;
             transition: all 0.3s;
+            cursor: pointer;
         }
 
         .stat-card:hover {
@@ -799,7 +713,6 @@
         }
 
         .stat-card.clickable {
-            cursor: pointer;
             background: rgba(248, 113, 113, 0.06);
             border-color: rgba(248, 113, 113, 0.15);
         }
@@ -1134,7 +1047,6 @@
                 opacity: 0;
                 transform: translateY(12px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1146,7 +1058,6 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1158,7 +1069,6 @@
                 opacity: 0;
                 transform: translateY(20px) scale(0.95);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -1227,20 +1137,6 @@
                 right: 10px;
                 border-radius: 12px;
             }
-
-            .bg-orb:nth-child(1) {
-                width: 300px;
-                height: 300px;
-            }
-
-            .bg-orb:nth-child(2) {
-                width: 250px;
-                height: 250px;
-            }
-
-            .bg-orb:nth-child(3) {
-                display: none;
-            }
         }
     </style>
 </head>
@@ -1249,16 +1145,6 @@
 
     <!-- Space Background -->
     <canvas id="space-canvas"></canvas>
-
-    <!-- Old Background Effects (Hidden) -->
-    <!--
-    <div class="bg-mesh">
-        <div class="bg-orb"></div>
-        <div class="bg-orb"></div>
-        <div class="bg-orb"></div>
-    </div>
-    <div class="bg-noise"></div>
-    -->
 
     <div class="app-container">
         <i class="fa-solid fa-sliders admin-trigger" onclick="openLogin()"></i>
@@ -1280,7 +1166,7 @@
             <div id="liveClock" class="clock-display">00:00</div>
             <div id="liveDate" class="date-display">...</div>
 
-            <!-- Network Status (WiFi + Ping) กลับมาแล้ว -->
+            <!-- Network Status -->
             <div class="network-status" id="networkStatus">
                 <i class="fa-solid fa-wifi wifi-icon"></i>
                 <div class="ping-info">
@@ -1355,21 +1241,21 @@
             </div>
 
             <div class="stat-bar">
-                <div class="stat-card">
+                <div class="stat-card" onclick="showSummary('total')">
                     <span class="stat-val" id="schoolTotal">0</span>
-                    <span class="stat-lbl">ทั้งหมด</span>
+                    <span class="stat-lbl">นักเรียนทั้งหมด</span>
                 </div>
-                <div class="stat-card" style="background:rgba(245, 158, 11, 0.1); border-color:rgba(245, 158, 11, 0.2)">
+                <div class="stat-card" style="background:rgba(245, 158, 11, 0.1); border-color:rgba(245, 158, 11, 0.2)" onclick="showSummary('morning')">
                     <span class="stat-val" id="schoolMorning" style="color:#f59e0b">0</span>
-                    <span class="stat-lbl">มาเช้า</span>
+                    <span class="stat-lbl">มาเช้าทั้งหมด</span>
                 </div>
-                <div class="stat-card" style="background:rgba(99, 102, 241, 0.1); border-color:rgba(99, 102, 241, 0.2)">
+                <div class="stat-card" style="background:rgba(99, 102, 241, 0.1); border-color:rgba(99, 102, 241, 0.2)" onclick="showSummary('afternoon')">
                     <span class="stat-val" id="schoolAfternoon" style="color:#818cf8">0</span>
-                    <span class="stat-lbl">มาบ่าย</span>
+                    <span class="stat-lbl">มาบ่ายทั้งหมด</span>
                 </div>
-                <div class="stat-card clickable" onclick="showGlobalAbsent()">
+                <div class="stat-card clickable" onclick="showAbsentByClass()">
                     <span class="stat-val" id="schoolAbsent" style="color:#ef4444">0</span>
-                    <span class="stat-lbl"> ขาดทั้งหมด</span>
+                    <span class="stat-lbl">ขาดทั้งหมด</span>
                 </div>
             </div>
 
@@ -1422,7 +1308,7 @@
         <div class="modal-box modal-large">
             <div class="modal-header-l">
                 <h3 style="margin:0; color:#ff6b6b; font-size:1.2rem;"><i class="fa-solid fa-triangle-exclamation"></i>
-                    รายชื่อคนขาด</h3>
+                    รายงานการเข้าเรียน</h3>
                 <button onclick="document.getElementById('absentModal').classList.remove('active')" class="pill-btn"
                     style="padding:5px 12px; border:none; color:#ff6b6b;"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -1481,26 +1367,20 @@
         async function measurePing() {
             const start = performance.now();
             try {
-                // ทำ request ไปยัง Firebase เพื่อวัดเวลา
                 await db.collection("config").doc("systemState").get();
                 const end = performance.now();
                 const ping = Math.round(end - start);
 
-                // เก็บค่า ping ใน history (สูงสุด 5 ค่า)
                 pingHistory.push(ping);
                 if (pingHistory.length > 5) pingHistory.shift();
 
-                // ค่าเฉลี่ย
                 const avgPing = Math.round(pingHistory.reduce((a, b) => a + b, 0) / pingHistory.length);
 
-                // อัพเดท UI
                 els.pingValue.textContent = avgPing;
 
-                // ปรับแต่งแถบตามค่า ping
                 let percentage = Math.min(100, Math.max(10, 100 - (avgPing / 2)));
                 els.pingBar.style.width = percentage + '%';
 
-                // เปลี่ยนสีตามคุณภาพ
                 els.pingBar.className = 'ping-fill';
                 if (avgPing < 50) {
                     els.pingBar.classList.add('excellent');
@@ -1518,12 +1398,10 @@
             }
         }
 
-        // วัด ping ทุก 5 วินาที
         setInterval(measurePing, 5000);
-        // วัดครั้งแรกทันที
         setTimeout(measurePing, 100);
 
-        // --- TIME & MODE (ระบบเปิดปิดหลังบ้าน) ---
+        // --- TIME & MODE ---
         function updateTime() {
             const now = new Date();
             els.clock.textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
@@ -1545,10 +1423,8 @@
                 }
             }
 
-            // อัพเดทสถานะจุดใน card
             updateSlotIndicators(activeSlot);
 
-            // อัพเดทการ enable/disable card
             Object.keys(els.slots).forEach(k => {
                 if (k === activeSlot) {
                     els.slots[k].classList.remove('disabled');
@@ -1562,7 +1438,6 @@
         function updateSlotIndicators(activeSlot) {
             const mins = (new Date().getHours() * 60) + new Date().getMinutes();
 
-            // รอบเช้า
             if ((activeSlot === 'morning' && systemMode !== 'closed') ||
                 (systemMode === 'manual_morning') ||
                 (systemMode === 'auto' && mins >= 510 && mins <= 550)) {
@@ -1571,7 +1446,6 @@
                 els.slotStatus.morning.className = 'slot-status closed';
             }
 
-            // รอบบ่าย
             if ((activeSlot === 'afternoon' && systemMode !== 'closed') ||
                 (systemMode === 'manual_afternoon') ||
                 (systemMode === 'auto' && mins >= 750 && mins <= 790)) {
@@ -1580,7 +1454,6 @@
                 els.slotStatus.afternoon.className = 'slot-status closed';
             }
 
-            // กรณีปิดระบบ
             if (systemMode === 'closed') {
                 els.slotStatus.morning.className = 'slot-status closed';
                 els.slotStatus.afternoon.className = 'slot-status closed';
@@ -1612,8 +1485,6 @@
                 return docRef.exists;
             } catch (error) {
                 console.error("Error checking duplicate:", error);
-                // Return null to indicate an error occurred (e.g. permissions),
-                // so caller won't continue as if "not duplicate".
                 return null;
             }
         }
@@ -1643,7 +1514,6 @@
                 const stu = studentDoc.data();
                 const isDuplicate = await checkDuplicateAttendance(id, selectedSlot);
 
-                // If checkDuplicateAttendance returned null -> an error (likely permissions)
                 if (isDuplicate === null) {
                     console.error('Cannot verify duplicate due to permission/error. Aborting write.');
                     showModal(false, 'ไม่สามารถตรวจสอบ/บันทึกข้อมูล — สิทธิ์ฐานข้อมูลไม่เพียงพอ', 'permission');
@@ -1685,7 +1555,6 @@
 
             } catch (e) {
                 console.error("Error in submitAttendance:", e);
-                // Detect Firebase permission errors and show clearer message
                 const msg = (e && e.code) || (e && e.message) || '';
                 if (msg.toString().toLowerCase().includes('missing or insufficient permissions') || msg.toString().toLowerCase().includes('permission')) {
                     showModal(false, 'ไม่สามารถเข้าถึงฐานข้อมูล: สิทธิ์ไม่เพียงพอ', 'permission');
@@ -1703,7 +1572,6 @@
             const t = document.getElementById('resTitle');
             const d = document.getElementById('resName');
 
-            // Special case: duplicate attendance (show warning style but not treated as generic error)
             if (subtitle === 'duplicate') {
                 i.className = 'fa-solid fa-xmark';
                 i.style.color = 'var(--danger)';
@@ -1714,7 +1582,6 @@
                 return;
             }
 
-            // Permission error (explicit message)
             if (subtitle === 'permission') {
                 i.className = 'fa-solid fa-circle-xmark';
                 i.style.color = 'var(--danger)';
@@ -1725,7 +1592,6 @@
                 return;
             }
 
-            // Existing behavior: success / late / error
             i.className = success ? (subtitle === 'มาสาย' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check') : 'fa-solid fa-circle-xmark';
             i.style.color = success ? (subtitle === 'มาสาย' ? 'var(--warning)' : 'var(--success)') : 'var(--danger)';
             t.textContent = success ? (subtitle === 'มาสาย' ? 'มาสายนะครับ' : 'บันทึกสำเร็จ') : 'เกิดข้อผิดพลาด';
@@ -1734,7 +1600,6 @@
             setTimeout(() => m.classList.remove('active'), 2000);
         }
 
-        // Dedicated duplicate UI so it's explicit and avoids being mistaken for a generic error
         function showDuplicate(name, slot) {
             const m = document.getElementById('resultOverlay');
             const i = document.getElementById('resIcon');
@@ -1824,8 +1689,26 @@
                         if (d.slot === 'afternoon') logsCache.afternoon[d.studentId] = d;
                     });
 
+                    updateStats();
                     renderAdminUI();
                 });
+        }
+
+        function updateStats() {
+            const totalStu = allStudentsCache.length;
+            const totalMorning = Object.keys(logsCache.morning).length;
+            const totalAfternoon = Object.keys(logsCache.afternoon).length;
+            
+            document.getElementById('schoolTotal').textContent = totalStu;
+            document.getElementById('schoolMorning').textContent = totalMorning;
+            document.getElementById('schoolAfternoon').textContent = totalAfternoon;
+            
+            // คำนวณจำนวนขาดทั้งหมด = นักเรียนทั้งหมด - (จำนวนคนมาเช้าหรือบ่ายตามเวลาปัจจุบัน)
+            const h = new Date().getHours();
+            const currentSlot = (h >= 12) ? 'afternoon' : 'morning';
+            const currentPresent = (currentSlot === 'morning') ? totalMorning : totalAfternoon;
+            const totalAbsent = totalStu - currentPresent;
+            document.getElementById('schoolAbsent').textContent = totalAbsent;
         }
 
         document.getElementById('classSelect').addEventListener('change', renderAdminUI);
@@ -1834,18 +1717,6 @@
             const cls = document.getElementById('classSelect').value;
             const targets = allStudentsCache.filter(s => s.class === cls).sort((a, b) => a.id - b.id);
 
-            const totalStu = allStudentsCache.length;
-            const totalMorning = Object.keys(logsCache.morning).length;
-            const totalAfternoon = Object.keys(logsCache.afternoon).length;
-            const h = new Date().getHours();
-            const currentSlotKey = (h >= 12) ? 'afternoon' : 'morning';
-            const currentPresent = (currentSlotKey === 'morning') ? totalMorning : totalAfternoon;
-            const totalAbsent = totalStu - currentPresent;
-
-            document.getElementById('schoolTotal').textContent = totalStu;
-            document.getElementById('schoolMorning').textContent = totalMorning;
-            document.getElementById('schoolAfternoon').textContent = totalAfternoon;
-            document.getElementById('schoolAbsent').textContent = totalAbsent;
             document.getElementById('classCount').textContent = targets.length;
 
             let html = '';
@@ -1875,46 +1746,207 @@
             document.getElementById('dualListContainer').innerHTML = html;
         }
 
-        // --- GLOBAL ABSENT LOGIC ---
-        window.showGlobalAbsent = () => {
+        // --- SHOW SUMMARY (แสดงคนไม่มา) ---
+        window.showSummary = (type) => {
+            const totalStu = allStudentsCache.length;
+            const totalMorning = Object.keys(logsCache.morning).length;
+            const totalAfternoon = Object.keys(logsCache.afternoon).length;
+            
+            let title = '';
+            let content = '';
+
+            if (type === 'total') {
+                title = '📊 สรุปจำนวนนักเรียนทั้งหมด';
+                content = `
+                    <div class="absent-summary-box">
+                        <div class="absent-count-big">${totalStu}</div>
+                        <div class="absent-text-sub">นักเรียนทั้งหมด</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: rgba(245, 158, 11, 0.1); border-radius: 12px; padding: 15px; text-align: center;">
+                            <div style="font-size: 2rem; color: #f59e0b;">${totalMorning}</div>
+                            <div style="color: var(--text-muted);">มาเช้า</div>
+                        </div>
+                        <div style="background: rgba(99, 102, 241, 0.1); border-radius: 12px; padding: 15px; text-align: center;">
+                            <div style="font-size: 2rem; color: #818cf8;">${totalAfternoon}</div>
+                            <div style="color: var(--text-muted);">มาบ่าย</div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (type === 'morning') {
+                title = '🌅 รายชื่อนักเรียนที่ไม่มาเช้า';
+                const presentIds = new Set(Object.keys(logsCache.morning));
+                const absentStudents = allStudentsCache.filter(s => !presentIds.has(s.id))
+                    .sort((a, b) => a.class.localeCompare(b.class) || a.id.localeCompare(b.id));
+                
+                content = `<div class="absent-summary-box">
+                    <div class="absent-count-big">${absentStudents.length}</div>
+                    <div class="absent-text-sub">นักเรียนที่ไม่มาเช้าทั้งหมด</div>
+                </div>`;
+
+                if (absentStudents.length === 0) {
+                    content += `<div style="text-align:center; padding:40px; color:var(--success);">
+                        <i class="fa-solid fa-circle-check" style="font-size:3rem; margin-bottom:10px;"></i><br>มาเรียนครบทุกคนแล้ว!
+                    </div>`;
+                } else {
+                    // Group by class
+                    const classGroups = {};
+                    absentStudents.forEach(s => {
+                        if (!classGroups[s.class]) classGroups[s.class] = [];
+                        classGroups[s.class].push(s);
+                    });
+
+                    // Show summary per class
+                    content += `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">`;
+                    Object.keys(classGroups).sort().forEach(className => {
+                        content += `
+                            <div style="background: rgba(245, 158, 11, 0.1); border-radius: 10px; padding: 10px; text-align: center;">
+                                <div style="font-size: 1.2rem; color: #f59e0b;">${classGroups[className].length}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">ห้อง ${className}</div>
+                            </div>
+                        `;
+                    });
+                    content += `</div>`;
+
+                    // List all absent students by class
+                    Object.keys(classGroups).sort().forEach(className => {
+                        content += `<div class="absent-class-header" style="color: #f59e0b;">📌 ห้อง ${className} (ขาด ${classGroups[className].length} คน)</div>`;
+                        classGroups[className].forEach(s => {
+                            content += `
+                                <div class="absent-card" style="border-left-color: #f59e0b;">
+                                    <div class="absent-info">
+                                        <span class="name" style="color: #f59e0b;">${s.name}</span>
+                                        <span class="id">รหัส: ${s.id}</span>
+                                    </div>
+                                    <div class="absent-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.2);">
+                                        <i class="fa-solid fa-xmark"></i> ขาด
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    });
+                }
+            } 
+            else if (type === 'afternoon') {
+                title = '🌙 รายชื่อนักเรียนที่ไม่มาบ่าย';
+                const presentIds = new Set(Object.keys(logsCache.afternoon));
+                const absentStudents = allStudentsCache.filter(s => !presentIds.has(s.id))
+                    .sort((a, b) => a.class.localeCompare(b.class) || a.id.localeCompare(b.id));
+                
+                content = `<div class="absent-summary-box">
+                    <div class="absent-count-big">${absentStudents.length}</div>
+                    <div class="absent-text-sub">นักเรียนที่ไม่มาบ่ายทั้งหมด</div>
+                </div>`;
+
+                if (absentStudents.length === 0) {
+                    content += `<div style="text-align:center; padding:40px; color:var(--success);">
+                        <i class="fa-solid fa-circle-check" style="font-size:3rem; margin-bottom:10px;"></i><br>มาเรียนครบทุกคนแล้ว!
+                    </div>`;
+                } else {
+                    // Group by class
+                    const classGroups = {};
+                    absentStudents.forEach(s => {
+                        if (!classGroups[s.class]) classGroups[s.class] = [];
+                        classGroups[s.class].push(s);
+                    });
+
+                    // Show summary per class
+                    content += `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">`;
+                    Object.keys(classGroups).sort().forEach(className => {
+                        content += `
+                            <div style="background: rgba(99, 102, 241, 0.1); border-radius: 10px; padding: 10px; text-align: center;">
+                                <div style="font-size: 1.2rem; color: #818cf8;">${classGroups[className].length}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">ห้อง ${className}</div>
+                            </div>
+                        `;
+                    });
+                    content += `</div>`;
+
+                    // List all absent students by class
+                    Object.keys(classGroups).sort().forEach(className => {
+                        content += `<div class="absent-class-header" style="color: #818cf8;">📌 ห้อง ${className} (ขาด ${classGroups[className].length} คน)</div>`;
+                        classGroups[className].forEach(s => {
+                            content += `
+                                <div class="absent-card" style="border-left-color: #818cf8;">
+                                    <div class="absent-info">
+                                        <span class="name" style="color: #818cf8;">${s.name}</span>
+                                        <span class="id">รหัส: ${s.id}</span>
+                                    </div>
+                                    <div class="absent-badge" style="color: #818cf8; border-color: rgba(99, 102, 241, 0.2);">
+                                        <i class="fa-solid fa-xmark"></i> ขาด
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    });
+                }
+            }
+
+            document.getElementById('absentModalList').innerHTML = content;
+            document.querySelector('#absentModal .modal-header-l h3').innerHTML = `<i class="fa-solid fa-chart-simple"></i> ${title}`;
+            document.getElementById('absentModal').classList.add('active');
+        };
+
+        // --- SHOW ABSENT BY CLASS ---
+        window.showAbsentByClass = () => {
             const h = new Date().getHours();
             const targetSlot = (h >= 12) ? 'afternoon' : 'morning';
             const targetLogs = logsCache[targetSlot];
             const presentIds = new Set(Object.keys(targetLogs));
 
-            const absentList = allStudentsCache.filter(s => !presentIds.has(s.id))
+            const absentStudents = allStudentsCache.filter(s => !presentIds.has(s.id))
                 .sort((a, b) => a.class.localeCompare(b.class) || a.id.localeCompare(b.id));
 
             let html = `<div class="absent-summary-box">
-                            <div class="absent-count-big">${absentList.length}</div>
-                            <div class="absent-text-sub">นักเรียนที่ขาด (รอบ${targetSlot === 'morning' ? 'เช้า' : 'บ่าย'})</div>
+                            <div class="absent-count-big">${absentStudents.length}</div>
+                            <div class="absent-text-sub">นักเรียนที่ขาดทั้งหมด (รอบ${targetSlot === 'morning' ? 'เช้า' : 'บ่าย'})</div>
                         </div>`;
 
-            if (absentList.length === 0) {
+            if (absentStudents.length === 0) {
                 html += `<div style="text-align:center; padding:40px; color:var(--success);">
                             <i class="fa-solid fa-circle-check" style="font-size:3rem; margin-bottom:10px;"></i><br>มาครบทุกคนแล้ว!
                           </div>`;
             } else {
-                let curClass = '';
-                absentList.forEach(s => {
-                    if (s.class !== curClass) {
-                        html += `<div class="absent-class-header">ห้อง ${s.class}</div>`;
-                        curClass = s.class;
-                    }
+                // Group by class and show count per class
+                const classGroups = {};
+                absentStudents.forEach(s => {
+                    if (!classGroups[s.class]) classGroups[s.class] = [];
+                    classGroups[s.class].push(s);
+                });
+
+                // Show summary per class first
+                html += `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">`;
+                Object.keys(classGroups).sort().forEach(className => {
                     html += `
-                    <div class="absent-card">
-                        <div class="absent-info">
-                            <span class="name">${s.name}</span>
-                            <span class="id">รหัส: ${s.id}</span>
+                        <div style="background: rgba(248, 113, 113, 0.1); border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 1.2rem; color: #f87171;">${classGroups[className].length}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ห้อง ${className}</div>
                         </div>
-                        <div class="absent-badge">
-                            <i class="fa-solid fa-xmark"></i> ขาด
-                        </div>
-                    </div>`;
+                    `;
+                });
+                html += `</div>`;
+
+                // Then list all absent students by class
+                Object.keys(classGroups).sort().forEach(className => {
+                    html += `<div class="absent-class-header">📌 ห้อง ${className} (ขาด ${classGroups[className].length} คน)</div>`;
+                    classGroups[className].forEach(s => {
+                        html += `
+                        <div class="absent-card">
+                            <div class="absent-info">
+                                <span class="name">${s.name}</span>
+                                <span class="id">รหัส: ${s.id}</span>
+                            </div>
+                            <div class="absent-badge">
+                                <i class="fa-solid fa-xmark"></i> ขาด
+                            </div>
+                        </div>`;
+                    });
                 });
             }
 
             document.getElementById('absentModalList').innerHTML = html;
+            document.querySelector('#absentModal .modal-header-l h3').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> รายงานการขาดเรียน`;
             document.getElementById('absentModal').classList.add('active');
         };
 
@@ -1964,16 +1996,14 @@
                 reset(initial = false) {
                     this.x = Math.random() * width;
                     this.y = Math.random() * height;
-                    this.z = Math.random() * 2 + 0.5; // Depth
+                    this.z = Math.random() * 2 + 0.5;
                     this.size = Math.random() * 1.5;
                     this.opacity = Math.random() * 0.5 + 0.3;
                 }
 
                 update() {
-                    // Move stars to the left (passing through effect)
                     this.x -= speed * this.z;
 
-                    // Wrap around
                     if (this.x < 0) {
                         this.x = width;
                         this.y = Math.random() * height;
@@ -1997,7 +2027,6 @@
                 }
             }
 
-            // --- SHOOTING STARS ---
             let shootingStars = [];
             class ShootingStar {
                 constructor() {
@@ -2010,8 +2039,8 @@
                     this.length = Math.random() * 80 + 10;
                     this.speed = Math.random() * 10 + 6;
                     this.size = Math.random() * 1 + 0.1;
-                    this.dirX = -1; // Moving Left
-                    this.dirY = Math.random() * 0.4 - 0.2; // Slight vertical drift
+                    this.dirX = -1;
+                    this.dirY = Math.random() * 0.4 - 0.2;
                     this.opacity = 0;
                     this.life = 0;
                     this.maxLife = Math.random() * 20 + 30;
@@ -2020,7 +2049,7 @@
 
                 spawn() {
                     this.reset();
-                    this.x = width + this.length; // Start off-screen right
+                    this.x = width + this.length;
                     this.y = Math.random() * (height / 2);
                     this.active = true;
                     this.opacity = 1;
@@ -2032,7 +2061,6 @@
                     this.y += this.dirY * this.speed;
                     this.life++;
 
-                    // Fade out
                     if (this.life > this.maxLife * 0.7) {
                         this.opacity -= 0.05;
                     }
@@ -2044,7 +2072,6 @@
 
                 draw() {
                     if (!this.active) return;
-                    // Draw trail
                     const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.length, this.y - (this.dirY * this.length));
                     gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
                     gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
@@ -2056,7 +2083,6 @@
                     ctx.lineTo(this.x + this.length, this.y - (this.dirY * this.length));
                     ctx.stroke();
 
-                    // Draw head
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size * 1.5, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
@@ -2066,28 +2092,25 @@
                 }
             }
 
-            // Create a pool of shooting stars
             for (let i = 0; i < 3; i++) {
                 shootingStars.push(new ShootingStar());
             }
 
-            // Occasionally spawn a shooting star
             setInterval(() => {
                 const star = shootingStars.find(s => !s.active);
-                if (star && Math.random() > 0.6) { // 40% chance every 2 seconds roughly if slot avail
+                if (star && Math.random() > 0.6) {
                     star.spawn();
                 }
             }, 2000);
 
             function animate() {
-                ctx.clearRect(0, 0, width, height); // Clear canvas
+                ctx.clearRect(0, 0, width, height);
 
                 stars.forEach(star => {
                     star.update();
                     star.draw();
                 });
 
-                // Update and draw shooting stars
                 shootingStars.forEach(s => {
                     s.update();
                     s.draw();
